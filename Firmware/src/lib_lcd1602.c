@@ -43,7 +43,7 @@ void lcd_init(const lcd_device_t *device)
 	lcd_send_cmd(device, 0x03);
 	lcd_send_cmd(device, 0x02);  // 4-bit Mode
 	lcd_send_cmd(device, 0x28);  // Init 4-bit mode
-	lcd_send_cmd(device, 0x0F);  // Dispay ON, Cursor OFF TODO: blinking cursor atm
+	lcd_send_cmd(device, 0x0C);  // Dispay ON, Cursor OFF
 	lcd_send_cmd(device, 0x06);  // Auto-Incriment Cursor
 	lcd_send_cmd(device, 0x01);  // Clear
 	lcd_send_cmd(device, 0x80);  // Return to Home Position

@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 0.2 06 Dec 2024 
+* Ver 0.3 07 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -22,6 +22,7 @@
 
 /*** Timing Variables ********************************************************/
 #define BAUD_CHECK_MS   500
+#define DISP_UPDATE_MS   50
 
 /*** Macros ******************************************************************/
 #define SYSTICK_ONE_MILLISECOND ((uint32_t)FUNCONF_SYSTEM_CORE_CLOCK / 1000)
@@ -30,13 +31,15 @@
 #define micros() (SysTick->CNT / SYSTICK_ONE_MICROSECOND)
 
 /*** Globals *****************************************************************/
-// UART Ring Buffer
+// UART Ring Buffer and Receive buffer
 #define UART_BUFFER_SIZE 128
-uint8_t uart_buffer[UART_BUFFER_SIZE];
+static uint8_t uart_buffer[UART_BUFFER_SIZE] = {0x00};
+static uint8_t recv_buffer[UART_BUFFER_SIZE] = {0x00};	
+
 
 // Create a UART Configuration 
 static uart_config_t uart_conf = {
-	.baudrate    = g_baudrate,
+	.baudrate    = UART_BAUD_4800,
 	.wordlength  = UART_WORDLENGTH_8,
 	.parity      = UART_PARITY_NONE,
 	.stopbits    = UART_STOPBITS_ONE,
@@ -54,8 +57,8 @@ static lcd_device_t lcd_dev = {
 // Incremented in the SysTick IRQ once per millisecond
 volatile uint32_t g_systick_millis;
 
-// Last Baud Check Millis
-static uint32_t last_baud_millis = 0;
+static uint32_t last_baud_update_millis = 0;
+static uint32_t last_disp_update_millis = 0;
 
 /*** Forward Declaration *****************************************************/
 /// @brief Initialise the SysTick interrupt to incriment every 1 millisecond
@@ -96,7 +99,6 @@ int main(void)
 	// Charge Pump is output in alternate function mode for PWM
 	gpio_set_mode(PUMP_PWM, OUTPUT_10MHZ_PP | OUTPUT_PP_AF);
 
-
 	// Wait for power to settle then init LCD
 	Delay_Ms(250);
 	lcd_init(&lcd_dev);
@@ -110,22 +112,55 @@ int main(void)
 	
 	// Initialise the UART driver, will start populating ring buffer
 	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
-	
+
+
+	lcd_send_string(&lcd_dev, "Testing");
+
+
+
+
+	// TODO: Move this
+	USART1->BRR = UART_BAUD_9600;
 
 	/*** Main Loop ***/
 	while(true)
 	{
-		// Check the Baud switches and adjust the uart baudrate accordingly
-		if(g_systick_millis - last_baud_millis > BAUD_CHECK_MS)
+		/*** Baudrate Selection Switch ***/
+		if(g_systick_millis - last_baud_update_millis > BAUD_CHECK_MS)
 		{
-			last_baud_millis = g_systick_millis;
 
-			//printf("tick\n");
+
+			last_baud_update_millis = g_systick_millis;
 		}
 
-	}
 
-}
+		/*** UART Data Parsing ***/
+		if(g_systick_millis - last_disp_update_millis > DISP_UPDATE_MS)
+		{
+			// Read any bytes availabe in the buffer, then parse it 
+			size_t recv_bytes = uart_read(recv_buffer, UART_BUFFER_SIZE);
+			for(uint8_t byte = 0; byte < recv_bytes; byte++)
+			{
+				// Handle Control Chars
+
+
+
+
+
+
+
+
+				lcd_send_char(&lcd_dev, recv_buffer[byte]);
+
+			}
+
+
+
+			last_disp_update_millis = g_systick_millis;
+		}
+
+	} // End of loop
+} // End of main()
 
 
 
