@@ -7,7 +7,7 @@ Features:
 * Backlight Control using UART or Hardware override
 * 4-bit LCD Control protocol support
 * Automatic Line Scroll
-* 3.3v operation?????
+* Operation down to 2.7v
 * LCD Contrast Charge Pump
 * Advance Display Control over UART
 
@@ -30,7 +30,7 @@ device is in the following state:
 
 ## Selectable Baudrate
 Receiver Baudrate is selected via the DIP-Switches onboard.  
-The setting is checked once every 500 Milliseconds so the setting can be 
+The setting is checked once every 1 Second so the setting can be 
 changed in realtime, allowing for live monitoring for correct setting.  
 ```
 B1 B0  Baud
@@ -41,7 +41,7 @@ B1 B0  Baud
 ```
 
 ## Low Voltage Operation
-There is a negative charge pump on-board that provides a near-rail negative
+There is a negative charge pump onboard that provides a near-rail negative
 voltage, that is fed to one end of the contrast selection Potentiometer.  
 These LCDs are only officially rated at 5v, so use lower voltages 
 **AT  YOUR OWN RISK**.  
@@ -49,7 +49,7 @@ To disable the charge pump, do not populate the components, and short
 the `JMP_V0_GND` Jumper.
 
 ## Control Characters
-`BELL    0x07` - Flashes the Backlight quickly for 1 Second  
+`BELL    0x07` - Flashes the Backlight quickly for 3 Seconds  
 `LF      0x0A` - Feeds line down, keeping Column Position  
 `CR      0x0D` - Returns to the First Column on the current line  
 `DC1     0x11` - Device Control 1, Turns Backlight On  
@@ -86,7 +86,13 @@ PD6  RX  UART Receive
 PD7  Reserved for NRST
 ```
 
+## Partslist
+
 ## TODO
+* UART Handling to LCD Buffer
+* Control Chars handling
+* Line Shift mechanism
+
 
 ----
 ADBeta (c) 2024
