@@ -34,7 +34,22 @@
 #define UART_BUFFER_SIZE 128
 uint8_t uart_buffer[UART_BUFFER_SIZE];
 
-static uart_baudrate_t g_baudrate = UART_BAUD_4800;
+// Create a UART Configuration 
+static uart_config_t uart_conf = {
+	.baudrate    = g_baudrate,
+	.wordlength  = UART_WORDLENGTH_8,
+	.parity      = UART_PARITY_NONE,
+	.stopbits    = UART_STOPBITS_ONE,
+	.flowctrl    = UART_FLOWCTRL_NONE,
+};
+
+// Create LCD Device
+static lcd_device_t lcd_dev = {
+	.LCD_RS = GPIO_PC0,
+	.LCD_RW = GPIO_PC1,
+	.LCD_EN = GPIO_PC2,
+	.LCD_DA = {GPIO_PC3, GPIO_PC4, GPIO_PC5, GPIO_PC6},
+};
 
 // Incremented in the SysTick IRQ once per millisecond
 volatile uint32_t g_systick_millis;
@@ -81,40 +96,23 @@ int main(void)
 	// Charge Pump is output in alternate function mode for PWM
 	gpio_set_mode(PUMP_PWM, OUTPUT_10MHZ_PP | OUTPUT_PP_AF);
 
-	// Start the PWM Controller going on PD4, at 50% Duty. 9.9KHz
+
+	// Wait for power to settle then init LCD
+	Delay_Ms(250);
+	lcd_init(&lcd_dev);
+
+	// Start the PWM on PD4: 50% Duty, 9.9KHz
 	pwm_init();
 	pwm_set_duty(127);
 
-	// Create a UART Configuration 
-	uart_config_t uart_conf = {
-		.baudrate    = g_baudrate,
-		.wordlength  = UART_WORDLENGTH_8,
-		.parity      = UART_PARITY_NONE,
-		.stopbits    = UART_STOPBITS_ONE,
-		.flowctrl    = UART_FLOWCTRL_NONE,
-	};
+	// Enable the systick for timing update and read of user settings
+	systick_init();
+	
+	// Initialise the UART driver, will start populating ring buffer
 	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
 	
 
-	//USART1->BRR = conf->baudrate;
-
-
-	// Create LCD Device
-	lcd_device_t lcd_dev = {
-		.LCD_RS = GPIO_PC0,
-		.LCD_RW = GPIO_PC1,
-		.LCD_EN = GPIO_PC2,
-		.LCD_DA = {GPIO_PC3, GPIO_PC4, GPIO_PC5, GPIO_PC6},
-	};
-
-	// Wait for power to settle then init LCD	
-	Delay_Ms(250);
-	lcd_init(&lcd_dev);
-	
-
-	// Enable the systick for delay-less timing
-	systick_init();
-
+	/*** Main Loop ***/
 	while(true)
 	{
 		// Check the Baud switches and adjust the uart baudrate accordingly
