@@ -21,8 +21,8 @@
 #define PUMP_PWM     GPIO_PD4
 
 /*** Timing Variables ********************************************************/
-#define BAUD_CHECK_MS   500
-#define DISP_UPDATE_MS   50
+#define BAUD_CHECK_MS   1000
+#define DISP_UPDATE_MS    50
 
 /*** Macros ******************************************************************/
 #define SYSTICK_ONE_MILLISECOND ((uint32_t)FUNCONF_SYSTEM_CORE_CLOCK / 1000)
@@ -114,7 +114,7 @@ int main(void)
 	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
 
 
-	lcd_send_string(&lcd_dev, "Testing");
+	//lcd_send_string(&lcd_dev, "Testing");
 
 
 
