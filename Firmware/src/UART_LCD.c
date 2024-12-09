@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 0.3 07 Dec 2024 
+* Ver 0.5 09 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -34,8 +34,12 @@
 // UART Ring Buffer and Receive buffer
 #define UART_BUFFER_SIZE 128
 static uint8_t uart_buffer[UART_BUFFER_SIZE] = {0x00};
-static uint8_t recv_buffer[UART_BUFFER_SIZE] = {0x00};	
+static uint8_t recv_buffer[UART_BUFFER_SIZE] = {0x00};
 
+// Baudrate lookup table
+static uart_baudrate_t baud_lookup[4] = { 
+	UART_BAUD_4800, UART_BAUD_9600, UART_BAUD_115200, UART_BAUD_460800 
+};
 
 // Create a UART Configuration 
 static uart_config_t uart_conf = {
@@ -48,10 +52,10 @@ static uart_config_t uart_conf = {
 
 // Create LCD Device
 static lcd_device_t lcd_dev = {
-	.LCD_RS = GPIO_PC0,
-	.LCD_RW = GPIO_PC1,
-	.LCD_EN = GPIO_PC2,
-	.LCD_DA = {GPIO_PC3, GPIO_PC4, GPIO_PC5, GPIO_PC6},
+	.LCD_RS = GPIO_PC1,
+	.LCD_RW = GPIO_PC2,
+	.LCD_EN = GPIO_PC3,
+	.LCD_DA = {GPIO_PC4, GPIO_PC5, GPIO_PC6, GPIO_PC7},
 };
 
 // Incremented in the SysTick IRQ once per millisecond
@@ -117,18 +121,19 @@ int main(void)
 	//lcd_send_string(&lcd_dev, "Testing");
 
 
-
-
-	// TODO: Move this
-	USART1->BRR = UART_BAUD_9600;
-
 	/*** Main Loop ***/
 	while(true)
 	{
 		/*** Baudrate Selection Switch ***/
 		if(g_systick_millis - last_baud_update_millis > BAUD_CHECK_MS)
 		{
+			// Get the current Baud Setting selection
+			uint8_t baud_setting = 
+				gpio_digital_read(BAUD_SEL_2) << 1 & 
+				gpio_digital_read(BAUD_SEL_1);
 
+			// Set the Baudrate register
+			USART1->BRR = baud_lookup[baud_setting];
 
 			last_baud_update_millis = g_systick_millis;
 		}
@@ -139,10 +144,11 @@ int main(void)
 		{
 			// Read any bytes availabe in the buffer, then parse it 
 			size_t recv_bytes = uart_read(recv_buffer, UART_BUFFER_SIZE);
+
+			// If any bytes were received, get the current LCD Position
 			for(uint8_t byte = 0; byte < recv_bytes; byte++)
 			{
-				// Handle Control Chars
-
+				// Handle the special chars
 
 
 

@@ -67,14 +67,14 @@ Control Characters not mentioned above will be ignored.
 PA1  Baud Select 1
 PA2  Baud Select 2
 
-PC0  LCD_RS  Register Select
-PC1  LCD_RW  Read/Write
-PC2  LCD_EN  Enable
-PC3  LCD_D4  Display Data Pin 4
-PC4  LCD_D5  Display Data Pin 5
-PC5  LCD_D6  Display Data Pin 6
-PC6  LCD_D7  Display Data Pin 7
-PC7  --
+PC0  ---
+PC1  LCD_RS  Register Select
+PC2  LCD_RW  Read/Write
+PC3  LCD_EN  Enable
+PC4  LCD_D4  Display Data Pin 4
+PC5  LCD_D5  Display Data Pin 5
+PC6  LCD_D6  Display Data Pin 6
+PC7  LCD_D7  Display Data Pin 7
 
 PD0  Backlight Control
 PD1  !!Reserved for SWIO!!
