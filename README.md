@@ -2,7 +2,6 @@
 UART/RS232 Enabled controller for a basic `1602 Monochrome LCD`, in 4-bit mode
 using the `CH32V003 - TSSOP-20` MCU  
 Features:
-* UART and RS232 Input
 * Selectable Baudrate
 * Backlight Control using UART or Hardware override
 * 4-bit LCD Control protocol support
@@ -54,9 +53,8 @@ the `JMP_V0_GND` Jumper.
 `CR      0x0D` - Returns to the First Column on the current line  
 `DC1     0x11` - Device Control 1, Turns Backlight On  
 `DC2     0x12` - Device Control 2, Turns Backlight Off  
-`DC3     0x13`   
-`DC4     0x14`  
-`CANCEL  0x18`  
+`DC3     0x13` -   
+`DC4     0x14` -  
 `ESCAPE  0x1B` - Clears the Screen and returns to position 0,0  
 
 Any Control Characters not mentioned above will be ignored.
@@ -88,8 +86,6 @@ PD7  Reserved for NRST
 ## Partslist
 
 ## TODO
-* UART Handling to LCD Buffer
-* Control Chars handling
 * Line Shift mechanism
 
 
