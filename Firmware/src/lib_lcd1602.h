@@ -25,8 +25,8 @@ typedef struct {
 
 /// @brief LCD Position struct
 typedef struct {
-	uint8_t x_pos;
-	uint8_t y_pos;
+	uint8_t x;
+	uint8_t y;
 } lcd_position_t;
 
 
@@ -64,7 +64,7 @@ void lcd_send_char(const lcd_device_t *device, const char data);
 /// @param device, LCD device pointer
 /// @param pos, lcd position pointer
 /// @return None
-void lcd_set_pos(const lcd_device_t *device, const lcd_position_t *pos);
+void lcd_set_pos(const lcd_device_t *device, const lcd_position_t pos);
 
 /// @brief Gets the current position of the cursor on the display
 /// @param device, LCD pointer

@@ -59,8 +59,7 @@ the `JMP_V0_GND` Jumper.
 `CANCEL  0x18`  
 `ESCAPE  0x1B` - Clears the Screen and returns to position 0,0  
 
-`TAB` will be replaced with a `SPACE`. `DEL`, `BACKSPACE`, and any other 
-Control Characters not mentioned above will be ignored.
+Any Control Characters not mentioned above will be ignored.
 
 ## Pinout
 ```

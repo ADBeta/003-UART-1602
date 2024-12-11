@@ -140,12 +140,12 @@ void lcd_send_char(const lcd_device_t *device, const char data)
 }
 
 
-void lcd_set_pos(const lcd_device_t *device, const lcd_position_t *pos)
+void lcd_set_pos(const lcd_device_t *device, lcd_position_t pos)
 {
-	if(pos->x_pos > 39 || pos->y_pos > 1) return;
+	if(pos.x > 39 || pos.y > 1) return;
 	// TODO: make this neater?
 	// Set DDRAM instruction is 0x80, Plus x_pos, y_pos is incriments of 0x40
-	lcd_send_cmd(device, 0x80 + pos->x_pos + (pos->y_pos * 0x40));
+	lcd_send_cmd(device, 0x80 + pos.x + (pos.y * 0x40));
 }
 
 
@@ -156,7 +156,7 @@ lcd_position_t lcd_get_pos(const lcd_device_t *device)
 	uint8_t addr = lcd_receive_byte(device) & 0x7F;
 
 	// x_pos is the addr excluding 0x40 bit, y_pos is 0x00 below 0x40, 0x01 above 0x40 
-	return (lcd_position_t){ .x_pos = addr & 0x3F, .y_pos = addr >> 6 };
+	return (lcd_position_t){ .x = addr & 0x3F, .y  = addr >> 6 };
 }
 
 

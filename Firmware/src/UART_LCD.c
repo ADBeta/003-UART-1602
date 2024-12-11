@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 0.5 09 Dec 2024 
+* Ver 0.6 11 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -16,8 +16,8 @@
 
 /*** Pin Definitions *********************************************************/
 #define LCD_BL       GPIO_PD0
-#define BAUD_SEL_1   GPIO_PA1
-#define BAUD_SEL_2   GPIO_PA2
+#define BAUD_SEL0    GPIO_PA1
+#define BAUD_SEL1    GPIO_PA2
 #define PUMP_PWM     GPIO_PD4
 
 /*** Timing Variables ********************************************************/
@@ -52,10 +52,10 @@ static uart_config_t uart_conf = {
 
 // Create LCD Device
 static lcd_device_t lcd_dev = {
-	.LCD_RS = GPIO_PC1,
-	.LCD_RW = GPIO_PC2,
-	.LCD_EN = GPIO_PC3,
-	.LCD_DA = {GPIO_PC4, GPIO_PC5, GPIO_PC6, GPIO_PC7},
+	.LCD_RS      = GPIO_PC1,
+	.LCD_RW      = GPIO_PC2,
+	.LCD_EN      = GPIO_PC3,
+	.LCD_DA      = {GPIO_PC4, GPIO_PC5, GPIO_PC6, GPIO_PC7},
 };
 
 // Incremented in the SysTick IRQ once per millisecond
@@ -98,8 +98,8 @@ int main(void)
 	gpio_set_mode(LCD_BL, OUTPUT_10MHZ_PP);
 	gpio_digital_write(LCD_BL, GPIO_LOW);
 	// Selection Switches are input
-	gpio_set_mode(BAUD_SEL_1, INPUT_FLOATING);
-	gpio_set_mode(BAUD_SEL_2, INPUT_FLOATING);
+	gpio_set_mode(BAUD_SEL0, INPUT_PULLDOWN);
+	gpio_set_mode(BAUD_SEL1, INPUT_PULLDOWN);
 	// Charge Pump is output in alternate function mode for PWM
 	gpio_set_mode(PUMP_PWM, OUTPUT_10MHZ_PP | OUTPUT_PP_AF);
 
@@ -117,10 +117,6 @@ int main(void)
 	// Initialise the UART driver, will start populating ring buffer
 	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
 
-
-	//lcd_send_string(&lcd_dev, "Testing");
-
-
 	/*** Main Loop ***/
 	while(true)
 	{
@@ -129,41 +125,93 @@ int main(void)
 		{
 			// Get the current Baud Setting selection
 			uint8_t baud_setting = 
-				gpio_digital_read(BAUD_SEL_2) << 1 & 
-				gpio_digital_read(BAUD_SEL_1);
+				gpio_digital_read(BAUD_SEL1) << 1 & 
+				gpio_digital_read(BAUD_SEL0);
 
 			// Set the Baudrate register
 			USART1->BRR = baud_lookup[baud_setting];
 
 			last_baud_update_millis = g_systick_millis;
-		}
+		} // End of Baudrate Selection
 
 
 		/*** UART Data Parsing ***/
 		if(g_systick_millis - last_disp_update_millis > DISP_UPDATE_MS)
 		{
+			static lcd_position_t lcd_pos = {0, 0};
+
 			// Read any bytes availabe in the buffer, then parse it 
 			size_t recv_bytes = uart_read(recv_buffer, UART_BUFFER_SIZE);
 
 			// If any bytes were received, get the current LCD Position
-			for(uint8_t byte = 0; byte < recv_bytes; byte++)
+			if(recv_bytes) lcd_pos = lcd_get_pos(&lcd_dev);
+
+			for(uint8_t index = 0; index < recv_bytes; index++)
 			{
-				// Handle the special chars
+				char c_char = recv_buffer[index];
+				// Only print valid ASCII Printable chars    TODO: Only up to 16 - add line scroll
+				if(c_char >= 0x20 && c_char <= 0x7E)
+				{
+					lcd_send_char(&lcd_dev, c_char);
 
+				}
 
+				// Handle Special Chars seperately
+				switch(c_char)
+				{
+					// BELL
+					case 0x07:
+						break;
 
+					// LINE FEED
+					// Moves down one line, keeping carriage position.
+					// If current position is on line 2, move data from line
+					// 2 to line 1, keep cursor in the same position
+					case 0x0A:
+						break;
 
+					// CARRIAGE RETURN
+					// Sets cursor position to char 0 of the current line
+					case 0x0D:
+						lcd_pos.x = 0;
+						lcd_set_pos(&lcd_dev, lcd_pos); 
+						break;
 
+					// DEVICE CONTROL 1
+					case 0x11:
+						break;
 
+					// DEVICE CONTROL 2
+					case 0x12:
+						break;
+					
+					// DEVICE CONTROL 3
+					case 0x13:
+						break;
+					
+					// DEVICE CONTROL 4
+					case 0x14:
+						break;
 
-				lcd_send_char(&lcd_dev, recv_buffer[byte]);
+					// CANCEL
+					case 0x18:
+						break;
 
+					// ESCAPE
+					// Clears the display and returns to 0
+					case 0x1B:
+						lcd_send_cmd(&lcd_dev,0x01);
+						break;
+
+					default:
+						break;
+				}
 			}
 
 
-
+			// Update timer for next UART data check
 			last_disp_update_millis = g_systick_millis;
-		}
+		} // End of Character Parsing
 
 	} // End of loop
 } // End of main()
