@@ -58,6 +58,8 @@ static lcd_device_t lcd_dev = {
 	.LCD_DA      = {GPIO_PC4, GPIO_PC5, GPIO_PC6, GPIO_PC7},
 };
 
+lcd_position_t lcd_pos = {0, 0};
+
 // Incremented in the SysTick IRQ once per millisecond
 volatile uint32_t g_systick_millis;
 
@@ -87,11 +89,22 @@ void pwm_init(void);
 __attribute__((always_inline))
 inline void pwm_set_duty(const uint32_t duty);
 
+/// @brief returns if the given char is a printable char
+/// @param char input
+/// @return bool result
+__attribute__((always_inline))
+inline bool is_printable(const char input) {
+	if(input >= 0x20) return true;
+	return false;
+}
+
 
 
 /*** Main ********************************************************************/
 int main(void)
 {
+	
+	/*** Init ***/
 	SystemInit();
 
 	// Backlight is output, turn off by default
@@ -117,6 +130,9 @@ int main(void)
 	// Initialise the UART driver, will start populating ring buffer
 	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
 
+
+
+
 	/*** Main Loop ***/
 	while(true)
 	{
@@ -135,76 +151,78 @@ int main(void)
 		} // End of Baudrate Selection
 
 
+
+
+
 		/*** UART Data Parsing ***/
 		if(g_systick_millis - last_disp_update_millis > DISP_UPDATE_MS)
 		{
-			static lcd_position_t lcd_pos = {0, 0};
-
 			// Read any bytes availabe in the buffer, then parse it 
 			size_t recv_bytes = uart_read(recv_buffer, UART_BUFFER_SIZE);
 
 			// If any bytes were received, get the current LCD Position
 			if(recv_bytes) lcd_pos = lcd_get_pos(&lcd_dev);
 
+		
 			for(uint8_t index = 0; index < recv_bytes; index++)
 			{
 				char c_char = recv_buffer[index];
-				// Only print valid ASCII Printable chars    TODO: Only up to 16 - add line scroll
-				if(c_char >= 0x20 && c_char <= 0x7E)
+				
+
+				// Print only Printable characters
+				if(is_printable(c_char))
 				{
 					lcd_send_char(&lcd_dev, c_char);
+				
 
-				}
+				// If it is a control char, parse it
+				} else {
+					switch(c_char)
+					{
+						// BELL
+						case 0x07:
+							break;
 
-				// Handle Special Chars seperately
-				switch(c_char)
-				{
-					// BELL
-					case 0x07:
-						break;
+						// LINE FEED
+						// Moves down one line, keeping carriage position.
+						// If on line 2, move display info up to line 1
+						case 0x0A:
+							break;
 
-					// LINE FEED
-					// Moves down one line, keeping carriage position.
-					// If current position is on line 2, move data from line
-					// 2 to line 1, keep cursor in the same position
-					case 0x0A:
-						break;
+						// CARRIAGE RETURN
+						// Sets cursor position to char 0 of the current line
+						case 0x0D:
+							lcd_pos.x = 0;
+							lcd_set_pos(&lcd_dev, lcd_pos); 
+							break;
 
-					// CARRIAGE RETURN
-					// Sets cursor position to char 0 of the current line
-					case 0x0D:
-						lcd_pos.x = 0;
-						lcd_set_pos(&lcd_dev, lcd_pos); 
-						break;
+						// DEVICE CONTROL 1
+						// Backlight ON
+						case 0x11:
+							break;
 
-					// DEVICE CONTROL 1
-					case 0x11:
-						break;
-
-					// DEVICE CONTROL 2
-					case 0x12:
-						break;
+						// DEVICE CONTROL 2
+						// Backlight OFF
+						case 0x12:
+							break;
 					
-					// DEVICE CONTROL 3
-					case 0x13:
-						break;
+						// DEVICE CONTROL 3
+						case 0x13:
+							break;
 					
-					// DEVICE CONTROL 4
-					case 0x14:
-						break;
+						// DEVICE CONTROL 4
+						case 0x14:
+							break;
 
-					// CANCEL
-					case 0x18:
-						break;
+						// ESCAPE
+						// Clears the display and returns to 0
+						case 0x1B:
+							lcd_send_cmd(&lcd_dev,0x01);
+							break;
 
-					// ESCAPE
-					// Clears the display and returns to 0
-					case 0x1B:
-						lcd_send_cmd(&lcd_dev,0x01);
-						break;
-
-					default:
-						break;
+						default:
+							break;
+					}
 				}
 			}
 
@@ -215,30 +233,6 @@ int main(void)
 
 	} // End of loop
 } // End of main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
