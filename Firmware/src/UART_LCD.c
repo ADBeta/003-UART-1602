@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 0.6 11 Dec 2024 
+* Ver 0.7 12 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -12,17 +12,13 @@
 #include "lib_uart.h"
 #include "lib_lcd1602.h"
 
-#include <stdio.h>
+//#include <stdio.h>
 
 /*** Pin Definitions *********************************************************/
+#define PUMP_PWM     GPIO_PD4
 #define LCD_BL       GPIO_PD0
 #define BAUD_SEL0    GPIO_PA1
 #define BAUD_SEL1    GPIO_PA2
-#define PUMP_PWM     GPIO_PD4
-
-/*** Timing Variables ********************************************************/
-#define BAUD_CHECK_MS   1000
-#define DISP_UPDATE_MS    50
 
 /*** Macros ******************************************************************/
 #define SYSTICK_ONE_MILLISECOND ((uint32_t)FUNCONF_SYSTEM_CORE_CLOCK / 1000)
@@ -31,18 +27,19 @@
 #define micros() (SysTick->CNT / SYSTICK_ONE_MICROSECOND)
 
 /*** Globals *****************************************************************/
+//// UART ////
 // UART Ring Buffer and Receive buffer
 #define UART_BUFFER_SIZE 128
-static uint8_t uart_buffer[UART_BUFFER_SIZE] = {0x00};
-static uint8_t recv_buffer[UART_BUFFER_SIZE] = {0x00};
+static uint8_t g_uart_buffer[UART_BUFFER_SIZE] = {0x00};
+static uint8_t g_recv_buffer[UART_BUFFER_SIZE] = {0x00};
 
 // Baudrate lookup table
-static uart_baudrate_t baud_lookup[4] = { 
+static uart_baudrate_t g_baud_lookup[4] = { 
 	UART_BAUD_4800, UART_BAUD_9600, UART_BAUD_115200, UART_BAUD_460800 
 };
 
 // Create a UART Configuration 
-static uart_config_t uart_conf = {
+static uart_config_t g_uart_conf = {
 	.baudrate    = UART_BAUD_4800,
 	.wordlength  = UART_WORDLENGTH_8,
 	.parity      = UART_PARITY_NONE,
@@ -50,21 +47,34 @@ static uart_config_t uart_conf = {
 	.flowctrl    = UART_FLOWCTRL_NONE,
 };
 
+
+//// LCD ////
+#define LCD_LINE_MAX_CHARS 16
+
 // Create LCD Device
-static lcd_device_t lcd_dev = {
+static lcd_device_t g_lcd_dev = {
 	.LCD_RS      = GPIO_PC1,
 	.LCD_RW      = GPIO_PC2,
 	.LCD_EN      = GPIO_PC3,
 	.LCD_DA      = {GPIO_PC4, GPIO_PC5, GPIO_PC6, GPIO_PC7},
 };
 
-lcd_position_t lcd_pos = {0, 0};
+lcd_position_t g_lcd_pos = {0, 0};
 
+GPIO_STATE g_backlight_state = GPIO_LOW;
+
+//// Timing ////
 // Incremented in the SysTick IRQ once per millisecond
 volatile uint32_t g_systick_millis;
 
-static uint32_t last_baud_update_millis = 0;
-static uint32_t last_disp_update_millis = 0;
+#define BAUD_UPDATE_MS   1000
+#define DISP_UPDATE_MS     50
+#define LIGHT_UPDATE_MS   250
+
+static uint32_t g_last_baud_update_millis    = 0;
+static uint32_t g_last_disp_update_millis    = 0;
+static uint32_t g_last_light_update_millis   = 0;
+
 
 /*** Forward Declaration *****************************************************/
 /// @brief Initialise the SysTick interrupt to incriment every 1 millisecond
@@ -102,8 +112,7 @@ inline bool is_printable(const char input) {
 
 /*** Main ********************************************************************/
 int main(void)
-{
-	
+{	
 	/*** Init ***/
 	SystemInit();
 
@@ -118,7 +127,7 @@ int main(void)
 
 	// Wait for power to settle then init LCD
 	Delay_Ms(250);
-	lcd_init(&lcd_dev);
+	lcd_init(&g_lcd_dev);
 
 	// Start the PWM on PD4: 50% Duty, 9.9KHz
 	pwm_init();
@@ -128,8 +137,7 @@ int main(void)
 	systick_init();
 	
 	// Initialise the UART driver, will start populating ring buffer
-	uart_init(uart_buffer, UART_BUFFER_SIZE, &uart_conf);
-
+	uart_init(g_uart_buffer, UART_BUFFER_SIZE, &g_uart_conf);
 
 
 
@@ -137,42 +145,41 @@ int main(void)
 	while(true)
 	{
 		/*** Baudrate Selection Switch ***/
-		if(g_systick_millis - last_baud_update_millis > BAUD_CHECK_MS)
+		if(g_systick_millis - g_last_baud_update_millis > BAUD_UPDATE_MS)
 		{
 			// Get the current Baud Setting selection
 			uint8_t baud_setting = 
-				gpio_digital_read(BAUD_SEL1) << 1 & 
-				gpio_digital_read(BAUD_SEL0);
+				((uint8_t)gpio_digital_read(BAUD_SEL1)) << 1 |
+				 (uint8_t)gpio_digital_read(BAUD_SEL0);
 
 			// Set the Baudrate register
-			USART1->BRR = baud_lookup[baud_setting];
+			USART1->BRR = g_baud_lookup[baud_setting];
 
-			last_baud_update_millis = g_systick_millis;
+			// Reset for the next baudrate update
+			g_last_baud_update_millis = g_systick_millis;
 		} // End of Baudrate Selection
 
 
 
-
-
 		/*** UART Data Parsing ***/
-		if(g_systick_millis - last_disp_update_millis > DISP_UPDATE_MS)
+		if(g_systick_millis - g_last_disp_update_millis > DISP_UPDATE_MS)
 		{
 			// Read any bytes availabe in the buffer, then parse it 
-			size_t recv_bytes = uart_read(recv_buffer, UART_BUFFER_SIZE);
+			size_t recv_chars = uart_read(g_recv_buffer, UART_BUFFER_SIZE);
 
 			// If any bytes were received, get the current LCD Position
-			if(recv_bytes) lcd_pos = lcd_get_pos(&lcd_dev);
+			if(recv_chars) g_lcd_pos = lcd_get_pos(&g_lcd_dev);
 
-		
-			for(uint8_t index = 0; index < recv_bytes; index++)
+			// Go through every received char to parse it
+			for(uint8_t index = 0; index < recv_chars; index++)
 			{
-				char c_char = recv_buffer[index];
+				char c_char = g_recv_buffer[index];
 				
 
-				// Print only Printable characters
+				// Print only Printable characters TODO: stop at 16
 				if(is_printable(c_char))
 				{
-					lcd_send_char(&lcd_dev, c_char);
+					lcd_send_char(&g_lcd_dev, c_char);
 				
 
 				// If it is a control char, parse it
@@ -192,32 +199,36 @@ int main(void)
 						// CARRIAGE RETURN
 						// Sets cursor position to char 0 of the current line
 						case 0x0D:
-							lcd_pos.x = 0;
-							lcd_set_pos(&lcd_dev, lcd_pos); 
+							g_lcd_pos.x = 0;
+							lcd_set_pos(&g_lcd_dev, g_lcd_pos);
 							break;
 
 						// DEVICE CONTROL 1
 						// Backlight ON
 						case 0x11:
+							g_backlight_state = GPIO_HIGH;
 							break;
 
 						// DEVICE CONTROL 2
 						// Backlight OFF
 						case 0x12:
+							g_backlight_state = GPIO_LOW;
 							break;
 					
 						// DEVICE CONTROL 3
+						// TBD
 						case 0x13:
 							break;
 					
 						// DEVICE CONTROL 4
+						// TBD
 						case 0x14:
 							break;
 
 						// ESCAPE
 						// Clears the display and returns to 0
 						case 0x1B:
-							lcd_send_cmd(&lcd_dev,0x01);
+							lcd_send_cmd(&g_lcd_dev,0x01);
 							break;
 
 						default:
@@ -227,9 +238,18 @@ int main(void)
 			}
 
 
-			// Update timer for next UART data check
-			last_disp_update_millis = g_systick_millis;
+			// Reset timer for next UART Data Update
+			g_last_disp_update_millis = g_systick_millis;
 		} // End of Character Parsing
+
+
+
+		if(g_systick_millis - g_last_light_update_millis > LIGHT_UPDATE_MS)
+		{
+			gpio_digital_write(LCD_BL, g_backlight_state);
+
+			g_last_light_update_millis = g_systick_millis;
+		} // End of Backlight Update
 
 	} // End of loop
 } // End of main()

@@ -58,7 +58,13 @@ void lcd_send_cmd(const lcd_device_t *device, const uint8_t data);
 /// @biref Sends a byte to the LCD in CHAR mode
 /// @param device, LCD device pointer
 /// @param data, 8bit data to be sent
+/// @return None
 void lcd_send_char(const lcd_device_t *device, const char data);
+
+/// @brief reads the char data at the current Address, then incriments address
+/// @param device, LCD Device pointer
+/// @return uint8_t char data (> ASCII)
+uint8_t lcd_read_char(const lcd_device_t *device);
 
 /// @brief Sets the position of the cursor on the display
 /// @param device, LCD device pointer

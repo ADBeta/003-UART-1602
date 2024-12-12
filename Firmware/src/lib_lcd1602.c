@@ -116,7 +116,7 @@ void lcd_transmit_byte(const lcd_device_t *device, const uint8_t byte)
 /*** High Level API Functions ************************************************/
 void lcd_send_cmd(const lcd_device_t *device, const uint8_t data)
 {
-	// Set Instruction Mode, Write mode
+	// Set Instruction Mode
 	gpio_digital_write(device->LCD_RS, GPIO_LOW);
 	delay_nop(750);
 	lcd_transmit_byte(device, data);
@@ -129,14 +129,23 @@ void lcd_send_cmd(const lcd_device_t *device, const uint8_t data)
 
 void lcd_send_char(const lcd_device_t *device, const char data)
 {
-	// Set Character Mode, Write mode
+	// Set Character Mode
 	gpio_digital_write(device->LCD_RS, GPIO_HIGH);
 	delay_nop(750);
 	lcd_transmit_byte(device, data);
 
 	// Read Instruction mode until BUSY_FLAG is not set
 	gpio_digital_write(device->LCD_RS, GPIO_LOW);
-	while((lcd_receive_byte(device) & 0x80));	
+	while((lcd_receive_byte(device) & 0x80));
+}
+
+
+uint8_t lcd_read_char(const lcd_device_t *device)
+{
+	// Set Character Mode
+	gpio_digital_write(device->LCD_RS, GPIO_HIGH);
+	delay_nop(750);
+	return lcd_receive_byte(device);
 }
 
 
