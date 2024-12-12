@@ -29,8 +29,8 @@ device is in the following state:
 
 ## Selectable Baudrate
 Receiver Baudrate is selected via the DIP-Switches onboard.  
-The setting is checked once every 1 Second so the setting can be 
-changed in realtime, allowing for live monitoring for correct setting.  
+The setting is checked once a second so the setting can be 
+changed on the fly.  
 ```
 B1 B0  Baud
 0  0   4800
@@ -45,7 +45,8 @@ voltage, that is fed to one end of the contrast selection Potentiometer.
 These LCDs are only officially rated at 5v, so use lower voltages 
 **AT  YOUR OWN RISK**.  
 To disable the charge pump, do not populate the components, and short
-the `JMP_V0_GND` Jumper.
+the `JMP_V0_GND` Jumper.  
+The `Minimum Voltage` for the unit is 2.7v
 
 ## Control Characters
 `BELL    0x07` - Flashes the Backlight quickly for 3 Seconds  
@@ -87,7 +88,7 @@ PD7  Reserved for NRST
 
 ## TODO
 * Line Shift mechanism
-
+* Bell flash
 
 ----
 ADBeta (c) 2024
