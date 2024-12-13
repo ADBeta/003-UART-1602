@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 0.7 12 Dec 2024 
+* Ver 1.0 13 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -167,20 +167,19 @@ int main(void)
 			// Read any bytes availabe in the buffer, then parse it 
 			size_t recv_chars = uart_read(g_recv_buffer, UART_BUFFER_SIZE);
 
-			// If any bytes were received, get the current LCD Position
-			if(recv_chars) g_lcd_pos = lcd_get_pos(&g_lcd_dev);
-
 			// Go through every received char to parse it
 			for(uint8_t index = 0; index < recv_chars; index++)
 			{
 				char c_char = g_recv_buffer[index];
 				
 
-				// Print only Printable characters TODO: stop at 16
+				// Print only Printable characters
 				if(is_printable(c_char))
 				{
-					lcd_send_char(&g_lcd_dev, c_char);
-				
+					// Get the current position, only print if below x[16]
+					g_lcd_pos = lcd_get_pos(&g_lcd_dev);
+					if(g_lcd_pos.x < 16) 
+						lcd_send_char(&g_lcd_dev, c_char);
 
 				// If it is a control char, parse it
 				} else {
@@ -194,11 +193,41 @@ int main(void)
 						// Moves down one line, keeping carriage position.
 						// If on line 2, move display info up to line 1
 						case 0x0A:
+							// Get the current position, if on the 1st line, move down
+							g_lcd_pos = lcd_get_pos(&g_lcd_dev);
+							if(g_lcd_pos.y == 0)
+							{
+								g_lcd_pos.y = 1;
+								lcd_set_pos(&g_lcd_dev, g_lcd_pos);
+							
+							// If it's on the second line...
+							} else {
+								// Copy everything from line 2
+								lcd_set_pos(&g_lcd_dev, (lcd_position_t){0,1});
+								uint8_t line_data[16] = {0x00};
+								for(uint8_t byte = 0; byte < 16; byte++)
+									line_data[byte] = lcd_read_char(&g_lcd_dev);
+
+								// Clear display, thenWrite that to line 1
+								lcd_send_cmd(&g_lcd_dev, 0x01);
+								for(uint8_t byte = 0; byte < 16; byte++)
+									lcd_send_char(&g_lcd_dev, line_data[byte]);
+
+								// Set the position to where it was
+								lcd_set_pos(&g_lcd_dev, g_lcd_pos);
+
+
+
+
+							}
+
+							
 							break;
 
 						// CARRIAGE RETURN
 						// Sets cursor position to char 0 of the current line
 						case 0x0D:
+							// TODO: g_lcd_pos = lcd_get_pos(&g_lcd_dev);
 							g_lcd_pos.x = 0;
 							lcd_set_pos(&g_lcd_dev, g_lcd_pos);
 							break;
@@ -228,7 +257,7 @@ int main(void)
 						// ESCAPE
 						// Clears the display and returns to 0
 						case 0x1B:
-							lcd_send_cmd(&g_lcd_dev,0x01);
+							lcd_send_cmd(&g_lcd_dev, 0x01);
 							break;
 
 						default:
