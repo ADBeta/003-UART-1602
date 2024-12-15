@@ -4,7 +4,7 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/UART_LCD
 *
-* Ver 1.0 13 Dec 2024 
+* Ver 1.2 15 Dec 2024 
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
@@ -202,32 +202,25 @@ int main(void)
 							
 							// If it's on the second line...
 							} else {
-								// Copy everything from line 2
+								// Copy line 2 data to buffer
+								char line_str[17] = {0x00};
 								lcd_set_pos(&g_lcd_dev, (lcd_position_t){0,1});
-								uint8_t line_data[16] = {0x00};
-								for(uint8_t byte = 0; byte < 16; byte++)
-									line_data[byte] = lcd_read_char(&g_lcd_dev);
+								lcd_read_string(&g_lcd_dev, line_str, 16);
 
-								// Clear display, thenWrite that to line 1
+								// Clear display - resets to 0,0
+								// write line 2 data to line 1
 								lcd_send_cmd(&g_lcd_dev, 0x01);
-								for(uint8_t byte = 0; byte < 16; byte++)
-									lcd_send_char(&g_lcd_dev, line_data[byte]);
+								lcd_send_string(&g_lcd_dev, line_str);
 
 								// Set the position to where it was
 								lcd_set_pos(&g_lcd_dev, g_lcd_pos);
-
-
-
-
-							}
-
-							
+							}							
 							break;
 
 						// CARRIAGE RETURN
 						// Sets cursor position to char 0 of the current line
 						case 0x0D:
-							// TODO: g_lcd_pos = lcd_get_pos(&g_lcd_dev);
+							g_lcd_pos = lcd_get_pos(&g_lcd_dev);
 							g_lcd_pos.x = 0;
 							lcd_set_pos(&g_lcd_dev, g_lcd_pos);
 							break;

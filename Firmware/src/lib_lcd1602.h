@@ -81,7 +81,13 @@ lcd_position_t lcd_get_pos(const lcd_device_t *device);
 /// @param device, LCD device pointer
 /// @param str, string to send
 /// @return None
-/// NOTE: Make this only allow up to 16 Chars??
 void lcd_send_string(const lcd_device_t *device, const char *str);
+
+
+
+
+
+
+void lcd_read_string(const lcd_device_t *device, char *str, const size_t chars);
 
 #endif

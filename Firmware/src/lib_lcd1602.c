@@ -171,8 +171,19 @@ lcd_position_t lcd_get_pos(const lcd_device_t *device)
 
 void lcd_send_string(const lcd_device_t *device, const char *str)
 {
-	uint8_t len = strlen(str);
-	for(uint8_t chr = 0; chr < len; chr++)
+	size_t len = strlen(str);
+	for(size_t chr = 0; chr < len; chr++)
 		lcd_send_char(device, str[chr]);
+}
+
+
+void lcd_read_string(const lcd_device_t *device, char *str, const size_t chars)
+{
+	for(size_t cchar = 0; cchar < chars; cchar++)
+	{
+		*str = lcd_read_char(device);
+		str++;
+	}
+	*str = '\n';
 }
 
