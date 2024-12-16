@@ -5,8 +5,8 @@
 	(uuid "1b3a31e6-8546-4961-865a-c3ba24a6ca42")
 	(paper "A4")
 	(title_block
-		(title "UART_LCD")
-		(date "2024-12-15")
+		(title "003-UART-1602")
+		(date "2024-12-16")
 		(rev "MkI")
 		(company "ADBeta")
 		(comment 1 "UART Enabled, Low Voltage LCD Controller using CH32V003")

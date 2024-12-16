@@ -5,7 +5,7 @@ TOOLKIT_DIR  := ./toolkit
 EXTRALIB_DIR := $(TOOLKIT_DIR)/extralibs
 
 # Project name
-TARGET := UART_LCD
+TARGET := 003-UART-1602
 
 # Compiles every additional .c file
 TARGET_SOURCE_FILES := $(filter-out $(SRC_DIR)/$(TARGET).c, $(wildcard $(SRC_DIR)/*.c))

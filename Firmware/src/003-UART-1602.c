@@ -1,18 +1,16 @@
 /******************************************************************************
-* UART_LCD
+* 003-UART-1602
 * A UART Enabled Controller for a basic 1602 Monochrome LCD
 * For more information see the GitHub: 
-* https://github.com/ADBeta/UART_LCD
+* https://github.com/ADBeta/003-UART-1602
 *
-* Ver 1.2 15 Dec 2024 
+* Ver 1.2    16 Dec 2024
 * ADBeta (c) 2024
 ******************************************************************************/
 #include "ch32v003fun.h"
 #include "lib_gpioctrl.h"
 #include "lib_uart.h"
 #include "lib_lcd1602.h"
-
-//#include <stdio.h>
 
 /*** Pin Definitions *********************************************************/
 #define PUMP_PWM     GPIO_PD4

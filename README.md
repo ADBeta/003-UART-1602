@@ -1,4 +1,4 @@
-# UART_LCD
+# 003-UART-1602
 UART/RS232 Enabled controller for a basic `1602 Monochrome LCD`, in 4-bit mode
 using the `CH32V003 - TSSOP-20` MCU  
 Features:

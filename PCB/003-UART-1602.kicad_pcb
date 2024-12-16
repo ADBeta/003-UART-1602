@@ -7,6 +7,12 @@
 		(legacy_teardrops no)
 	)
 	(paper "A4")
+	(title_block
+		(title "003-UART-1602")
+		(date "2024-12-16")
+		(rev "MkI")
+		(company "ADBeta")
+	)
 	(layers
 		(0 "F.Cu" signal)
 		(31 "B.Cu" signal)
@@ -117,7 +123,7 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP1"
-			(at 0 -1.448001 360)
+			(at 0 -1.448001 0)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "76dfed03-4d02-48f5-9403-c68cd692be2e")
@@ -129,7 +135,7 @@
 			)
 		)
 		(property "Value" "VIN"
-			(at 5.412152 -0.16 360)
+			(at 5.412152 -0.16 0)
 			(layer "F.Fab")
 			(uuid "fbfa774b-8393-42df-b657-56991770a61d")
 			(effects
@@ -206,7 +212,7 @@
 			(uuid "f57dbde5-961b-4ef9-859c-8c5a3846fea4")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 -1.45 360)
+			(at 0 -1.45 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "729a0f6c-eb59-47c7-8270-40957d84a3b3")
@@ -443,7 +449,7 @@
 			(uuid "663ce922-51a1-4f85-87f1-b80cc126de1f")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(uuid "b40446ef-7eea-4998-87ab-62a158ac258f")
 			(effects
@@ -1360,7 +1366,7 @@
 			(uuid "c15c65d4-9988-4739-b98b-21fdd31b6483")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 360)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(uuid "fe84e57a-ce81-4259-b71a-32b02d0a6770")
 			(effects
@@ -2355,7 +2361,7 @@
 			)
 		)
 		(property "Value" "CH32V003"
-			(at -0.775519 0 360)
+			(at -0.775519 0 0)
 			(layer "F.Fab")
 			(uuid "b7253aea-435a-42c2-888a-37dcc6025fa9")
 			(effects
@@ -2549,7 +2555,7 @@
 			(uuid "1769f236-93eb-4f76-b0ba-8c941f618d5b")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0.62448 1.3057 360)
+			(at 0.62448 1.3057 0)
 			(layer "F.Fab")
 			(uuid "1208703a-2712-4417-a90f-f411af43afc2")
 			(effects
@@ -3959,7 +3965,7 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP2"
-			(at 0 -1.448001 360)
+			(at 0 -1.448001 0)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "d8813f08-7a3b-4b40-96ec-edd43cbbad84")
@@ -3971,7 +3977,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 5.512152 0.35 360)
+			(at 5.512152 0.35 0)
 			(layer "F.Fab")
 			(uuid "346d991a-07e7-4e36-becc-0cdb4a969855")
 			(effects
@@ -4048,7 +4054,7 @@
 			(uuid "a065f6d8-c16b-48fa-bf54-333242b9fd7c")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 -1.45 360)
+			(at 0 -1.45 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "3e2e1b56-fa40-436e-8fae-a65eecec66b0")
@@ -4076,7 +4082,7 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP3"
-			(at 0 -1.448001 360)
+			(at 0 -1.448001 0)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "ee4ca448-4912-480b-807f-770fdcc5261e")
@@ -4088,7 +4094,7 @@
 			)
 		)
 		(property "Value" "SWIO"
-			(at 6.912152 1.309999 360)
+			(at 6.912152 1.309999 0)
 			(layer "F.Fab")
 			(uuid "8d5e4f54-5a2a-4417-af79-b81e4d1d50fc")
 			(effects
@@ -4165,7 +4171,7 @@
 			(uuid "fb5eabfa-e871-4ec0-a52d-83f278fe6e78")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 -1.45 360)
+			(at 0 -1.45 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "434a0f23-e960-4800-972b-2d18c1919c82")
@@ -4461,7 +4467,7 @@
 		(descr "SMD Solder Jumper, 1x1.5mm, rounded Pads, 0.3mm gap, open")
 		(tags "solder jumper open")
 		(property "Reference" "JP2"
-			(at -4.9 0 360)
+			(at -4.9 0 0)
 			(layer "B.SilkS")
 			(hide yes)
 			(uuid "7394fab5-367a-4e93-a858-2697c2d5ed32")
@@ -4474,7 +4480,7 @@
 			)
 		)
 		(property "Value" "JMP_BL_GND"
-			(at -2.2 -0.6 360)
+			(at -2.2 -0.6 0)
 			(layer "B.SilkS")
 			(uuid "1abd2d34-a211-47d8-8866-170d8323d6b1")
 			(effects
@@ -5046,7 +5052,7 @@
 			(uuid "10e38d30-92fc-4ecd-ab3c-4e0825e98f28")
 		)
 		(fp_text user "${REFERENCE}"
-			(at -3.018 2.54 360)
+			(at -3.018 2.54 0)
 			(layer "B.Fab")
 			(uuid "d12ca8eb-8d95-4933-83e9-ed5ec2a73cea")
 			(effects
@@ -5109,7 +5115,7 @@
 		(descr "SMD Solder Jumper, 1x1.5mm, rounded Pads, 0.3mm gap, open")
 		(tags "solder jumper open")
 		(property "Reference" "JP1"
-			(at 0 1.8 360)
+			(at 0 1.8 0)
 			(layer "B.SilkS")
 			(hide yes)
 			(uuid "4f8828d8-22ba-4711-b398-ee64038fb1e7")
@@ -5122,7 +5128,7 @@
 			)
 		)
 		(property "Value" "JMP_V0_GND"
-			(at 0 2.05 360)
+			(at 0 2.05 0)
 			(layer "B.SilkS")
 			(uuid "d0bc8979-de8b-4dc3-9149-706caa4abc48")
 			(effects
