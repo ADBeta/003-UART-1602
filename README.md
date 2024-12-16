@@ -87,8 +87,8 @@ PD7  Reserved for NRST
 ## Partslist
 
 ## TODO
-* Line Shift mechanism
 * Bell flash
+* Device Contol 3 and 4 Behaviour
 
 ----
 ADBeta (c) 2024
