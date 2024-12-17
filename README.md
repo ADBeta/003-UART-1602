@@ -10,7 +10,6 @@ Features:
 * LCD Contrast Charge Pump
 * Advance Display Control over UART
 
-
 ## Display Operation
 The display will read any incoming UART or RS232 Data and print it to the 
 screen in realtime - If the edge of the screen is exceeded, the display will
@@ -45,7 +44,7 @@ voltage, that is fed to one end of the contrast selection Potentiometer.
 These LCDs are only officially rated at 5v, so use lower voltages 
 **AT  YOUR OWN RISK**.  
 To disable the charge pump, do not populate the components, and short
-the `JMP_V0_GND` Jumper.  
+the `JMP_V0` Jumper.  
 The `Minimum Voltage` for the unit is 2.7v
 
 ## Control Characters

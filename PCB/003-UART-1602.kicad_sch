@@ -4302,7 +4302,7 @@
 				)
 			)
 		)
-		(property "Value" "JMP_V0_GND"
+		(property "Value" "JMP_V0"
 			(at 259.08 33.02 0)
 			(effects
 				(font
@@ -4707,7 +4707,7 @@
 				)
 			)
 		)
-		(property "Value" "JMP_BL_GND"
+		(property "Value" "JMP_BL"
 			(at 193.04 85.09 0)
 			(effects
 				(font
