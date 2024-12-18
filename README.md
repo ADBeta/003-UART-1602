@@ -11,9 +11,9 @@ Features:
 * Advance Display Control over UART
 
 <div style="display: flex; align-items: center; gap: 10px;">
-  <img src="/images/Schematic.png" alt="Schematic" width="200">
-  <img src="/images/Front.png" alt="PCB_Front" width="200">
-  <img src="/images/Back.png" alt="PCB_Back" width="200">
+  <img src="/images/Schematic.png" alt="Schematic" width="800"><br>
+  <img src="/images/Front.png" alt="PCB_Front" width="400">
+  <img src="/images/Back.png" alt="PCB_Back" width="400">
 </div>
 
 ## Display Operation
