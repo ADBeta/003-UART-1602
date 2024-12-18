@@ -6,7 +6,7 @@
 	(paper "A4")
 	(title_block
 		(title "003-UART-1602")
-		(date "2024-12-16")
+		(date "2024-12-18")
 		(rev "MkI")
 		(company "ADBeta")
 		(comment 1 "UART Enabled, Low Voltage LCD Controller using CH32V003")

@@ -10,6 +10,12 @@ Features:
 * LCD Contrast Charge Pump
 * Advance Display Control over UART
 
+<div style="display: flex; align-items: center; gap: 10px;">
+  <img src="/images/Schematic.png" alt="Schematic" width="200">
+  <img src="/images/Front.png" alt="PCB_Front" width="200">
+  <img src="/images/Back.png" alt="PCB_Back" width="200">
+</div>
+
 ## Display Operation
 The display will read any incoming UART or RS232 Data and print it to the 
 screen in realtime - If the edge of the screen is exceeded, the display will
