@@ -95,5 +95,11 @@ PD7  Reserved for NRST
 * Bell flash
 * Device Contol 3 and 4 Behaviour
 
+## MkII PCB TODO
+* Move parts to clear metal tabs on LCD
+* Swap SWIO Markings to back side
+* Change POT footprint
+
+
 ----
 ADBeta (c) 2024
