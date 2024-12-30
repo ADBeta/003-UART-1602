@@ -24,6 +24,14 @@
 #define millis() (g_systick_millis)
 #define micros() (SysTick->CNT / SYSTICK_ONE_MICROSECOND)
 
+/*** Enums and Structs *******************************************************/
+typedef enum {
+	LED_OFF       = 1,
+	LED_ON        = 2,
+	LED_BLINK     = 3
+} led_mode_t;
+
+
 /*** Globals *****************************************************************/
 //// UART ////
 // UART Ring Buffer and Receive buffer
@@ -45,7 +53,6 @@ static uart_config_t g_uart_conf = {
 	.flowctrl    = UART_FLOWCTRL_NONE,
 };
 
-
 //// LCD ////
 #define LCD_LINE_MAX_CHARS 16
 
@@ -59,7 +66,10 @@ static lcd_device_t g_lcd_dev = {
 
 lcd_position_t g_lcd_pos = {0, 0};
 
-GPIO_STATE g_backlight_state = GPIO_LOW;
+// When a BELL is received, blink a set number of times.
+led_mode_t g_led_mode =   LED_OFF;
+uint32_t   g_led_blinks = 0;
+
 
 //// Timing ////
 // Incremented in the SysTick IRQ once per millisecond
@@ -67,7 +77,7 @@ volatile uint32_t g_systick_millis;
 
 #define BAUD_UPDATE_MS   1000
 #define DISP_UPDATE_MS     50
-#define LIGHT_UPDATE_MS   250
+#define LIGHT_UPDATE_MS   100
 
 static uint32_t g_last_baud_update_millis    = 0;
 static uint32_t g_last_disp_update_millis    = 0;
@@ -185,6 +195,8 @@ int main(void)
 					{
 						// BELL
 						case 0x07:
+							g_led_mode = LED_BLINK;
+							g_led_blinks = 20;
 							break;
 
 						// LINE FEED
@@ -226,13 +238,15 @@ int main(void)
 						// DEVICE CONTROL 1
 						// Backlight ON
 						case 0x11:
-							g_backlight_state = GPIO_HIGH;
+							g_led_mode = LED_ON;
+							g_led_blinks = 0;
 							break;
 
 						// DEVICE CONTROL 2
 						// Backlight OFF
 						case 0x12:
-							g_backlight_state = GPIO_LOW;
+							g_led_mode = LED_OFF;
+							g_led_blinks = 0;
 							break;
 					
 						// DEVICE CONTROL 3
@@ -266,7 +280,36 @@ int main(void)
 
 		if(g_systick_millis - g_last_light_update_millis > LIGHT_UPDATE_MS)
 		{
-			gpio_digital_write(LCD_BL, g_backlight_state);
+			static led_mode_t last_mode = LED_OFF;
+			static GPIO_STATE last_state = GPIO_LOW;
+
+
+			switch(g_led_mode)
+			{
+				case LED_OFF:
+					gpio_digital_write(LCD_BL, GPIO_LOW);
+					last_mode =   LED_OFF;
+					last_state =  GPIO_LOW;
+					break;
+
+				case LED_ON:
+					gpio_digital_write(LCD_BL, GPIO_HIGH);
+					last_mode =   LED_ON;
+					last_state =  GPIO_HIGH;
+					break;
+
+				case LED_BLINK:
+					// Reset when done blinking
+					if(g_led_blinks-- == 0) g_led_mode = last_mode;
+					// Toggle the LED
+					gpio_digital_write(LCD_BL, (last_state = !last_state));
+					
+					break;
+				
+
+				default:
+					break;
+			}
 
 			g_last_light_update_millis = g_systick_millis;
 		} // End of Backlight Update
