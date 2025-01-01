@@ -89,17 +89,22 @@ PD6  RX  UART Receive
 PD7  Reserved for NRST
 ```
 
-## Partslist
+## MkII PCB Partslist
+```
+C1    0603 1uF 10V
+C2    0603 1uF 10V
+C3    0603 1uF 10V
+R1    0603 4K7
+R2    100K 5mm x 5mm Potentiometer
+D1    BAT54S
+Q1    AO3401 P-Ch
+Q2    A03400 N-Ch
+U1    CH32V003
+SW1   1.27mm 2P DIP Switch
+```
 
 ## TODO
-* Bell flash
 * Device Contol 3 and 4 Behaviour
 
-## MkII PCB TODO
-* Move parts to clear metal tabs on LCD
-* Swap SWIO Markings to back side
-* Change POT footprint
-
-
 ----
-ADBeta (c) 2024
+ADBeta (c) 2024 - 2025
