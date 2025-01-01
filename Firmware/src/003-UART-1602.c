@@ -4,8 +4,8 @@
 * For more information see the GitHub: 
 * https://github.com/ADBeta/003-UART-1602
 *
-* Ver 1.2    16 Dec 2024
-* ADBeta (c) 2024
+* Ver 1.4    01 Jan 2025
+* ADBeta (c) 2024 - 2025
 ******************************************************************************/
 #include "ch32v003fun.h"
 #include "lib_gpioctrl.h"
